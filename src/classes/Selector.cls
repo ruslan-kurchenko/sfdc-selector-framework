@@ -11,4 +11,10 @@ public interface Selector {
     List<SObject> whereId(List<SObject> records);
 
     List<SObject> whereId(Set<SObject> records);
+
+    Selector filter(String field, Operator operator, String value);
+
+    Selector filter(String field, Operator operator, Id value);
+
+    Selector filter(String field, Operator operator, Integer value);
 }

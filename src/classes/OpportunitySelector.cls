@@ -40,4 +40,16 @@ public with sharing class OpportunitySelector implements Selector {
         return (List<Opportunity>) this.abstractSelector.whereId(records);
     }
 
+    public Selector filter(String field, Operator operator, String value) {
+        return this.abstractSelector.filter(field, operator, value);
+    }
+
+    public Selector filter(String field, Operator operator, Id value) {
+        return this.abstractSelector.filter(field, operator, value);
+    }
+
+    public Selector filter(String field, Operator operator, Integer value) {
+        return this.abstractSelector.filter(field, operator, value);
+    }
+
 }
