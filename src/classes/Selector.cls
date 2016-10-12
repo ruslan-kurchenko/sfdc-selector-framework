@@ -1,4 +1,4 @@
-public interface Selector {
+public interface Selector extends Filterable {
 
     List<SObject> get();
 
@@ -12,9 +12,4 @@ public interface Selector {
 
     List<SObject> whereId(Set<SObject> records);
 
-    Selector filter(String field, Operator operator, String value);
-
-    Selector filter(String field, Operator operator, Id value);
-
-    Selector filter(String field, Operator operator, Integer value);
 }
