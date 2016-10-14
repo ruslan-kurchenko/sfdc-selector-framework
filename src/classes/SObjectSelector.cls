@@ -1,34 +1,35 @@
-public with sharing class AbstractSelector implements Selector {
+public with sharing class SObjectSelector implements Selector {
 
     private Schema.DescribeSObjectResult sobjectDescribe;
     private FieldsContainer fieldsContainer;
+    private Boolean isCustomFieldContainer;
     //TODO: implement exculde fields functionality
-    private String gluedExcludedFields;
+    private String excludedFieldsByComa;
     private List<Filter> filters;
     private String query;
     private String lastQuery;
 
-    public AbstractSelector(Schema.DescribeSObjectResult sobjectDescribe, FieldsContainer fieldsContainer) {
+    private static final Map<String, Schema.SObjectType> GLOBAL_DESCRIBE = Schema.getGlobalDescribe();
+
+    public SObjectSelector(Schema.DescribeSObjectResult sobjectDescribe, FieldsContainer fieldsContainer) {
         this.sobjectDescribe = sobjectDescribe;
         this.fieldsContainer = fieldsContainer;
-        System.debug('\n\n fieldsContainer => ' + fieldsContainer + '\n');
+        this.isCustomFieldContainer = false;
         this.refresh();
     }
 
-
-    public AbstractSelector(Schema.DescribeSObjectResult sobjectDescribe) {
+    public SObjectSelector(Schema.DescribeSObjectResult sobjectDescribe) {
         this(sobjectDescribe, new FieldsContainer(sobjectDescribe));
     }
 
-    public AbstractSelector(String sobjectName) {
-        Schema.DescribeSObjectResult sobjectDescribe = Schema.getGlobalDescribe().get(sobjectName).getDescribe();
-        if(sobjectDescribe == null) {
+    public SObjectSelector(String sobjectName) {
+        Schema.DescribeSObjectResult sobjectDescribe = GLOBAL_DESCRIBE.get(sobjectName).getDescribe();
+        if (sobjectDescribe == null) {
             // TODO: throw exception - IncompatibleSObjectType
-            System.debug(LoggingLevel.ERROR,'\n\n Throw exception - IncompatibleSObjectType \n');
         }
         this.sobjectDescribe = sobjectDescribe;
         this.fieldsContainer = new FieldsContainer(sobjectDescribe);
-        System.debug('\n\n fieldsContainer => ' + fieldsContainer + '\n');
+        this.isCustomFieldContainer = false;
         this.refresh();
     }
 
@@ -36,8 +37,8 @@ public with sharing class AbstractSelector implements Selector {
     public List<SObject> get() {
         this.buildQuery();
         this.lastQuery = this.query;
-        System.debug('\n\n this.query => ' + this.query + '\n');
 
+        //System.debug(LoggingLevel.INFO, '\n\n Execution query: \n' + this.query + '\n');
         List<SObject> selectResult = Database.query(this.query);
 
         this.refresh();
@@ -45,16 +46,13 @@ public with sharing class AbstractSelector implements Selector {
     }
 
     private void buildQuery() {
-        this.query = 'SELECT ';
-        System.debug('\n\n string.isBlank(this.gluedExcludedFields) => ' + String.isBlank(this.gluedExcludedFields) + '\n');
-        if (String.isNotBlank(this.gluedExcludedFields)) {
+        this.query = 'SELECT \n';
+        if (String.isNotBlank(this.excludedFieldsByComa)) {
             FieldsContainer allFieldsContainer = new FieldsContainer(sobjectDescribe);
             allFieldsContainer.filter(this.fieldsContainer);
             this.query += allFieldsContainer.join(',');
-            System.debug('\n\n here \n');
         } else {
             this.query += this.fieldsContainer.join(',');
-            System.debug('\n\n here!!! \n');
         }
 
         this.query += ' FROM ' + this.sobjectDescribe.getName();
@@ -69,7 +67,7 @@ public with sharing class AbstractSelector implements Selector {
 
     private void refresh() {
         this.filters = new List<Filter>();
-        this.gluedExcludedFields = null;
+        this.excludedFieldsByComa = null;
         // TODO: add refresh limit, order by and etc.
     }
 
@@ -101,6 +99,62 @@ public with sharing class AbstractSelector implements Selector {
     }
 
 
+    public Selector fields(String fieldsByComa) {
+        Set<String> fields = splitFieldsByComa(fieldsByComa);
+        if (!this.isCustomFieldContainer) {
+            this.fieldsContainer = new FieldsContainer(fields);
+            this.isCustomFieldContainer = true;
+        } else {
+            this.fieldsContainer.addAll(fields);
+        }
+
+        return this;
+    }
+
+    public Selector parent(String parentFieldPath) {
+        //TODO: refactoring, replace GlobalDescribe on the class level
+        //TODO: validate string
+        List<String> fieldPathNames = parentFieldPath.split('\\.');
+        String relationshipFieldName = fieldPathNames.get(fieldPathNames.size() - 1);
+
+        String formatedRelationshipFieldName;
+        if (relationshipFieldName.toLowerCase().contains('__r')) {
+            formatedRelationshipFieldName = relationshipFieldName.toLowerCase().replace('__r', '__c');
+        } else {
+            formatedRelationshipFieldName = relationshipFieldName + 'Id';
+        }
+
+        //TODO: validate, if not standard name - need to provide specific fields
+        Map<String, Schema.SObjectField> childFields = GLOBAL_DESCRIBE.get(this.sobjectDescribe.getName()).getDescribe().fields.getMap();
+        List<Schema.SObjectType> alowedReferenceTypes = childFields.get(formatedRelationshipFieldName).getDescribe().getReferenceTo();
+        String referenceObjectName;
+        if (!alowedReferenceTypes.isEmpty()) {
+            if (alowedReferenceTypes.size() > 1) {
+                System.debug(LoggingLevel.ERROR, '\n\n More then one type in the list types!' + alowedReferenceTypes + '\n');
+            } else {
+                referenceObjectName = alowedReferenceTypes.get(0).getDescribe().getName();
+            }
+        } else {
+            System.debug(LoggingLevel.ERROR, '\n\n The field is not relationship type! \n');
+            //TODO: thow error with above debug message.
+        }
+
+        Schema.DescribeSObjectResult parentSObjectDescribe = Schema.getGlobalDescribe().get(referenceObjectName).getDescribe();
+        return this.parent(parentFieldPath, new FieldsContainer(parentSObjectDescribe));
+    }
+
+    public Selector parent(String parentFieldPath, String fieldsByComa) {
+        return this.parent(parentFieldPath, new FieldsContainer(splitFieldsByComa(fieldsByComa)));
+    }
+
+    public Selector parent(String parentFieldPath, FieldsContainer fieldsContainer) {
+        List<String> allParentFields = new List<String>(fieldsContainer.getFields());
+        for (String field : allParentFields) {
+            this.fieldsContainer.add(parentFieldPath + '.' + field);
+        }
+        return this;
+    }
+
     public Selector filter(String field, Operator operator, String value) {
         this.filters.add(new Filter(field, operator, value));
         return this;
@@ -115,7 +169,6 @@ public with sharing class AbstractSelector implements Selector {
         this.filters.add(new Filter(field, operator, value));
         return this;
     }
-
 
     public Selector filter(String field, Operator operator, Boolean value) {
         this.filters.add(new Filter(field, operator, value));
@@ -262,19 +315,20 @@ public with sharing class AbstractSelector implements Selector {
         return this;
     }
 
+    public Selector filter(String field, Operator operator) {
+        this.filters.add(new Filter(field, operator));
+        return this;
+    }
+
 
     private class Filter {
         private String field;
-        private Operator operator;
+        private Operator oper;
         private Object value;
 
-        private Filter(String field, Operator operator) {
-            this.field = field;
-            this.operator = operator;
-        }
-
         private Filter(String field, Operator operator, Object value) {
-            this(field, operator);
+            this.field = field;
+            this.oper = operator;
             this.value = value;
         }
 
@@ -412,9 +466,21 @@ public with sharing class AbstractSelector implements Selector {
             this(field, operator, getIds(values));
         }
 
+        public Filter(String field, Operator nullCondition) {
+            if (nullCondition != Operator.IS_NULL || nullCondition != Operator.IS_NOT_NULL) {
+                // TODO: thow uncompatible Operator exception.
+            }
+
+            List<String> conditionParts = nullCondition.getValue().split(' ');
+            String operatorValue = conditionParts.get(0);
+            this.field = field;
+            this.oper = operatorValue == Operator.EQUALS.getValue() ? Operator.EQUALS : Operator.NOT_EQUALS;
+            this.value = conditionParts.get(1);
+        }
+
 
         public String getCondition() {
-            return this.field + this.operator.getValue() + this.value;
+            return this.field + this.oper.getValue() + this.value;
         }
 
     }
@@ -440,6 +506,16 @@ public with sharing class AbstractSelector implements Selector {
             }
         }
         return ids;
+    }
+
+    private static Set<String> splitFieldsByComa(String fieldsByComa) {
+        //TODO: add validation for entered string.
+        List<String> fields = fieldsByComa.split(',');
+        Set<String> resultFields = new Set<String>();
+        for (String field : fields) {
+            resultFields.add(field.trim());
+        }
+        return resultFields;
     }
 
 }

@@ -18,6 +18,14 @@ public with sharing class FieldsContainer {
         }
     }
 
+    public void add(String field) {
+        this.fields.add(field);
+    }
+
+    public void addAll(Set<String> fields) {
+        this.fields.addAll(fields);
+    }
+
     public Set<String> getFields() {
         return this.fields;
     }

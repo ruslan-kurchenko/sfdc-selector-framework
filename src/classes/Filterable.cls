@@ -64,4 +64,5 @@ public interface Filterable {
 
     Selector filter(String field, Operator operator, Set<SObject> value);
 
+    Selector filter(String field, Operator operator);
 }

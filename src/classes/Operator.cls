@@ -6,12 +6,15 @@ public class Operator {
     public static final Operator LESS = new Operator('<');
     public static final Operator LESS_EQUALS = new Operator('<=');
     public static final Operator EQUALS = new Operator('=');
-    public static final Operator NOT_QUALS = new Operator('!=');
+    public static final Operator NOT_EQUALS = new Operator('!=');
     public static final Operator IS_LIKE = new Operator('LIKE');
     public static final Operator IS_IN = new Operator('IN');
     public static final Operator IS_NOT_IN = new Operator('NOT IN');
     public static final Operator INCLUDES = new Operator('INCLUDES');
-    public static final Operator NOT_INCLUDES = new Operator('INCLUDES');
+    public static final Operator NOT_INCLUDES = new Operator('NOT INCLUDES');
+    public static final Operator IS_NULL = new Operator('= null');
+    public static final Operator IS_NOT_NULL = new Operator('!= null');
+
 
     private Operator(String value) {
         this.value = value;
