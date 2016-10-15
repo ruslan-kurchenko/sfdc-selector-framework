@@ -3,13 +3,23 @@ public with sharing class SObjectSelector implements Selector {
     private Schema.DescribeSObjectResult sobjectDescribe;
     private FieldsContainer fieldsContainer;
     private Boolean isCustomFieldContainer;
+
     //TODO: implement exculde fields functionality
     private String excludedFieldsByComa;
     private List<Filter> filters;
+
+    private String orderByFieldsByComa;
+    private OrderSequence orderSeq;
+    private OrderNulls orderNullValues;
+
     private String query;
     private String lastQuery;
 
     private static final Map<String, Schema.SObjectType> GLOBAL_DESCRIBE = Schema.getGlobalDescribe();
+
+    private static final OrderSequence DEFAULT_ORDER_SEQUENCE = OrderSequence.ASCENDING;
+    private static final OrderNulls DEFAULT_ORDER_NULLS = OrderNulls.FIRST;
+
 
     public SObjectSelector(Schema.DescribeSObjectResult sobjectDescribe, FieldsContainer fieldsContainer) {
         this.sobjectDescribe = sobjectDescribe;
@@ -38,7 +48,7 @@ public with sharing class SObjectSelector implements Selector {
         this.buildQuery();
         this.lastQuery = this.query;
 
-        //System.debug(LoggingLevel.INFO, '\n\n Execution query: \n' + this.query + '\n');
+        System.debug(LoggingLevel.INFO, '\n\n Execution query: \n' + this.query + '\n');
         List<SObject> selectResult = Database.query(this.query);
 
         this.refresh();
@@ -46,7 +56,7 @@ public with sharing class SObjectSelector implements Selector {
     }
 
     private void buildQuery() {
-        this.query = 'SELECT \n';
+        this.query = 'SELECT ';
         if (String.isNotBlank(this.excludedFieldsByComa)) {
             FieldsContainer allFieldsContainer = new FieldsContainer(sobjectDescribe);
             allFieldsContainer.filter(this.fieldsContainer);
@@ -62,6 +72,10 @@ public with sharing class SObjectSelector implements Selector {
             this.query += !conditionStarted ? ' WHERE ' : ' AND ';
             this.query += filter.getCondition();
             conditionStarted = true;
+        }
+
+        if(String.isNotBlank(this.orderByFieldsByComa)) {
+            this.query += ' ORDER BY ' + this.orderByFieldsByComa + ' ' + this.orderSeq.getValue() + ' ' + this.orderNullValues.getValue();
         }
     }
 
@@ -111,6 +125,7 @@ public with sharing class SObjectSelector implements Selector {
         return this;
     }
 
+
     public Selector parent(String parentFieldPath) {
         //TODO: refactoring, replace GlobalDescribe on the class level
         //TODO: validate string
@@ -154,6 +169,7 @@ public with sharing class SObjectSelector implements Selector {
         }
         return this;
     }
+
 
     public Selector filter(String field, Operator operator, String value) {
         this.filters.add(new Filter(field, operator, value));
@@ -321,6 +337,28 @@ public with sharing class SObjectSelector implements Selector {
     }
 
 
+    public Selector orderBy(String fieldsByComa) {
+        return this.orderBy(fieldsByComa, DEFAULT_ORDER_SEQUENCE, DEFAULT_ORDER_NULLS);
+    }
+
+    public Selector orderBy(String fieldsByComa, OrderSequence sequence) {
+        return this.orderBy(fieldsByComa, sequence, DEFAULT_ORDER_NULLS);
+    }
+
+    public Selector orderBy(String fieldsByComa, OrderNulls oderNullVal) {
+        return this.orderBy(fieldsByComa, DEFAULT_ORDER_SEQUENCE, oderNullVal);
+    }
+
+    public Selector orderBy(String fieldsByComa, OrderSequence sequence, OrderNulls oderNullVal) {
+        //TODO: validate passed fields.
+        //TODO: validate if order fields was already set.
+        this.orderByFieldsByComa = fieldsByComa;
+        this.orderSeq = sequence;
+        this.orderNullValues = oderNullVal;
+        return this;
+    }
+
+
     private class Filter {
         private String field;
         private Operator oper;
@@ -484,6 +522,7 @@ public with sharing class SObjectSelector implements Selector {
         }
 
     }
+
 
     private static String formatString(String value) {
         return '\'' + value + '\'';
