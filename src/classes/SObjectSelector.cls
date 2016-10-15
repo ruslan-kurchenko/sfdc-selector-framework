@@ -65,29 +65,174 @@ public with sharing class SObjectSelector extends AbstractSelector implements Fi
     }
 
 
-    public DynamicConditionSObjectSelector query() {
-        return null;
+    public Selector filter(String field, Operator operator, String value) {
+        this.filters.add(new Filter(field, operator, value));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Id value) {
+        this.filters.add(new Filter(field, operator, value));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Integer value) {
+        this.filters.add(new Filter(field, operator, value));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Boolean value) {
+        this.filters.add(new Filter(field, operator, value));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Date value) {
+        this.filters.add(new Filter(field, operator, value));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Datetime value) {
+        this.filters.add(new Filter(field, operator, value));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Decimal value) {
+        this.filters.add(new Filter(field, operator, value));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Double value) {
+        this.filters.add(new Filter(field, operator, value));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Long value) {
+        this.filters.add(new Filter(field, operator, value));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Time value) {
+        this.filters.add(new Filter(field, operator, value));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, List<String> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, List<Id> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, List<Boolean> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, List<Date> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, List<Datetime> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, List<Decimal> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, List<Double> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, List<Integer> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, List<Long> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, List<Time> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Set<String> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Set<Id> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Set<Boolean> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Set<Date> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Set<Datetime> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Set<Decimal> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Set<Double> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Set<Integer> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Set<Long> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Set<Time> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, List<SObject> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator, Set<SObject> values) {
+        this.filters.add(new Filter(field, operator, values));
+        return this;
+    }
+
+    public Selector filter(String field, Operator operator) {
+        this.filters.add(new Filter(field, operator));
+        return this;
     }
 
 
-    private class DynamicConditionSObjectSelector extends AbstractSelector {
-
-        public DynamicConditionSObjectSelector(Schema.DescribeSObjectResult sobjectDescribe, FieldsContainer fieldsContainer) {
-            super(sobjectDescribe, fieldsContainer);
-        }
-
-        public DynamicConditionSObjectSelector(Schema.DescribeSObjectResult sobjectDescribe) {
-            this(sobjectDescribe, new FieldsContainer(sobjectDescribe));
-        }
-
-        public DynamicConditionSObjectSelector(String sobjectName) {
-            super(sobjectName);
-        }
-
-        private void buildQuery() {
-
-        }
-
+    public DynamicConditionSObjectSelector query(String booleanCondition) {
+        return new DynamicConditionSObjectSelector(this.sobjectDescribe, this.fieldsContainer, booleanCondition);
     }
 
 }
