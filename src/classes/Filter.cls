@@ -4,6 +4,8 @@ public with sharing class Filter {
     private Operator oper;
     private Object value;
 
+    private final static SelectorQueryUtil util = new SelectorQueryUtil();
+
     private Filter(String field, Operator operator, Object value) {
         this.field = field;
         this.oper = operator;
@@ -11,15 +13,11 @@ public with sharing class Filter {
     }
 
     public Filter(String field, Operator operator, String value) {
-        this(field, operator, (Object) formatString(value));
+        this(field, operator, (Object) util.formatString(value));
     }
 
     public Filter(String field, Operator operator, Id value) {
-        this(field, operator, (Object) formatString(value));
-    }
-
-    public Filter(String field, Operator operator, Integer value) {
-        this(field, operator, (Object) value);
+        this(field, operator, (Object) util.formatString(String.valueOf(value)));
     }
 
     public Filter(String field, Operator operator, Boolean value) {
@@ -38,24 +36,17 @@ public with sharing class Filter {
         this(field, operator, (Object) value);
     }
 
-    public Filter(String field, Operator operator, Double value) {
-        this(field, operator, (Object) value);
-    }
-
-    public Filter(String field, Operator operator, Long value) {
-        this(field, operator, (Object) value);
-    }
-
     public Filter(String field, Operator operator, Time value) {
         this(field, operator, (Object) value);
     }
+
 
     public Filter(String field, Operator operator, List<String> values) {
         this(field, operator);
 
         String formatedValues = '(';
         for (String value : values) {
-            formatedValues += formatString(value) + ',';
+            formatedValues += util.formatString(value) + ',';
         }
         this.value = formatedValues.removeEnd(',') + ')';
     }
@@ -65,36 +56,25 @@ public with sharing class Filter {
     }
 
     public Filter(String field, Operator operator, List<Boolean> values) {
-        this(field, operator, formatObjectList(values));
+        this(field, operator, util.formatObjectList(values));
     }
 
     public Filter(String field, Operator operator, List<Date> values) {
-        this(field, operator, formatObjectList(values));
+        this(field, operator, util.formatObjectList(values));
     }
 
     public Filter(String field, Operator operator, List<Datetime> values) {
-        this(field, operator, formatObjectList(values));
+        this(field, operator, util.formatObjectList(values));
     }
 
     public Filter(String field, Operator operator, List<Decimal> values) {
-        this(field, operator, formatObjectList(values));
-    }
-
-    public Filter(String field, Operator operator, List<Double> values) {
-        this(field, operator, formatObjectList(values));
-    }
-
-    public Filter(String field, Operator operator, List<Integer> values) {
-        this(field, operator, formatObjectList(values));
-    }
-
-    public Filter(String field, Operator operator, List<Long> values) {
-        this(field, operator, formatObjectList(values));
+        this(field, operator, util.formatObjectList(values));
     }
 
     public Filter(String field, Operator operator, List<Time> values) {
-        this(field, operator, formatObjectList(values));
+        this(field, operator, util.formatObjectList(values));
     }
+
 
     public Filter(String field, Operator operator, Set<String> values) {
         this(field, operator, new List<String>(values));
@@ -120,28 +100,17 @@ public with sharing class Filter {
         this(field, operator, new List<Decimal>(values));
     }
 
-    public Filter(String field, Operator operator, Set<Double> values) {
-        this(field, operator, new List<Double>(values));
-    }
-
-    public Filter(String field, Operator operator, Set<Integer> values) {
-        this(field, operator, new List<Integer>(values));
-    }
-
-    public Filter(String field, Operator operator, Set<Long> values) {
-        this(field, operator, new List<Long>(values));
-    }
-
     public Filter(String field, Operator operator, Set<Time> values) {
         this(field, operator, new List<Time>(values));
     }
 
+
     public Filter(String field, Operator operator, List<SObject> values) {
-        this(field, operator, getIds(new Set<SObject>(values)));
+        this(field, operator, util.getIds(new Set<SObject>(values)));
     }
 
     public Filter(String field, Operator operator, Set<SObject> values) {
-        this(field, operator, getIds(values));
+        this(field, operator, util.getIds(values));
     }
 
     public Filter(String field, Operator nullCondition) {
@@ -159,30 +128,6 @@ public with sharing class Filter {
 
     public String getCondition() {
         return this.field + this.oper.getValue() + this.value;
-    }
-
-
-    private static String formatString(String value) {
-        return '\'' + value + '\'';
-    }
-
-    private static String formatObjectList(List<Object> values) {
-        String formatedString = '(';
-        for (Object value : values) {
-            formatedString += value + ',';
-        }
-        return formatedString.removeEnd(',') + ')';
-    }
-
-    private static Set<Id> getIds(Set<SObject> records) {
-        Set<Id> ids = new Set<Id>();
-        for (SObject rec : records) {
-            Id id = (Id) rec.get('Id');
-            if (id != null) {
-                ids.add(id);
-            }
-        }
-        return ids;
     }
 
 }

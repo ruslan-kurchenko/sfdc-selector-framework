@@ -1,4 +1,4 @@
-public with sharing class SObjectSelector extends AbstractSelector implements Filterable {
+public with sharing class SObjectSelector extends AbstractSelector implements FilterableSelector {
 
     public SObjectSelector(Schema.DescribeSObjectResult sobjectDescribe, FieldsContainer fieldsContainer) {
         super(sobjectDescribe, fieldsContainer);
@@ -44,12 +44,12 @@ public with sharing class SObjectSelector extends AbstractSelector implements Fi
         return selectResult.isEmpty() ? null : selectResult.get(0);
     }
 
-    public List<SObject> whereId(Set<Id> ids) {
+    public List<SObject> whereId(Set<String> ids) {
         this.filter('Id', Operator.IS_IN, ids);
         return this.get();
     }
 
-    public List<SObject> whereId(List<Id> ids) {
+    public List<SObject> whereId(List<String> ids) {
         this.filter('Id', Operator.IS_IN, ids);
         return this.get();
     }
@@ -65,173 +65,132 @@ public with sharing class SObjectSelector extends AbstractSelector implements Fi
     }
 
 
-    public Selector filter(String field, Operator operator, String value) {
+    public FilterableSelector filter(String field, Operator operator, String value) {
         this.filters.add(new Filter(field, operator, value));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, Id value) {
+    public FilterableSelector filter(String field, Operator operator, Boolean value) {
         this.filters.add(new Filter(field, operator, value));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, Integer value) {
+    public FilterableSelector filter(String field, Operator operator, Id value) {
         this.filters.add(new Filter(field, operator, value));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, Boolean value) {
+    public FilterableSelector filter(String field, Operator operator, Date value) {
         this.filters.add(new Filter(field, operator, value));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, Date value) {
+    public FilterableSelector filter(String field, Operator operator, Datetime value) {
         this.filters.add(new Filter(field, operator, value));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, Datetime value) {
+    public FilterableSelector filter(String field, Operator operator, Decimal value) {
         this.filters.add(new Filter(field, operator, value));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, Decimal value) {
+    public FilterableSelector filter(String field, Operator operator, Time value) {
         this.filters.add(new Filter(field, operator, value));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, Double value) {
-        this.filters.add(new Filter(field, operator, value));
-        return this;
-    }
 
-    public Selector filter(String field, Operator operator, Long value) {
-        this.filters.add(new Filter(field, operator, value));
-        return this;
-    }
-
-    public Selector filter(String field, Operator operator, Time value) {
-        this.filters.add(new Filter(field, operator, value));
-        return this;
-    }
-
-    public Selector filter(String field, Operator operator, List<String> values) {
+    public FilterableSelector filter(String field, Operator operator, List<String> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, List<Id> values) {
+    public FilterableSelector filter(String field, Operator operator, List<Id> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, List<Boolean> values) {
+    public FilterableSelector filter(String field, Operator operator, List<Boolean> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, List<Date> values) {
+    public FilterableSelector filter(String field, Operator operator, List<Date> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, List<Datetime> values) {
+    public FilterableSelector filter(String field, Operator operator, List<Datetime> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, List<Decimal> values) {
+    public FilterableSelector filter(String field, Operator operator, List<Decimal> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, List<Double> values) {
+    public FilterableSelector filter(String field, Operator operator, List<Time> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, List<Integer> values) {
+
+    public FilterableSelector filter(String field, Operator operator, Set<String> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, List<Long> values) {
+    public FilterableSelector filter(String field, Operator operator, Set<Id> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, List<Time> values) {
+    public FilterableSelector filter(String field, Operator operator, Set<Boolean> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, Set<String> values) {
+    public FilterableSelector filter(String field, Operator operator, Set<Date> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, Set<Id> values) {
+    public FilterableSelector filter(String field, Operator operator, Set<Datetime> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, Set<Boolean> values) {
+    public FilterableSelector filter(String field, Operator operator, Set<Decimal> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, Set<Date> values) {
+    public FilterableSelector filter(String field, Operator operator, Set<Time> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, Set<Datetime> values) {
+
+    public FilterableSelector filter(String field, Operator operator, List<SObject> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, Set<Decimal> values) {
+    public FilterableSelector filter(String field, Operator operator, Set<SObject> values) {
         this.filters.add(new Filter(field, operator, values));
         return this;
     }
 
-    public Selector filter(String field, Operator operator, Set<Double> values) {
-        this.filters.add(new Filter(field, operator, values));
-        return this;
-    }
 
-    public Selector filter(String field, Operator operator, Set<Integer> values) {
-        this.filters.add(new Filter(field, operator, values));
-        return this;
-    }
-
-    public Selector filter(String field, Operator operator, Set<Long> values) {
-        this.filters.add(new Filter(field, operator, values));
-        return this;
-    }
-
-    public Selector filter(String field, Operator operator, Set<Time> values) {
-        this.filters.add(new Filter(field, operator, values));
-        return this;
-    }
-
-    public Selector filter(String field, Operator operator, List<SObject> values) {
-        this.filters.add(new Filter(field, operator, values));
-        return this;
-    }
-
-    public Selector filter(String field, Operator operator, Set<SObject> values) {
-        this.filters.add(new Filter(field, operator, values));
-        return this;
-    }
-
-    public Selector filter(String field, Operator operator) {
+    public FilterableSelector filter(String field, Operator operator) {
         this.filters.add(new Filter(field, operator));
         return this;
     }
 
 
-    public DynamicConditionSObjectSelector query(String booleanCondition) {
+    public DynamicConditionSObjectSelector condition(String booleanCondition) {
         return new DynamicConditionSObjectSelector(this.sobjectDescribe, this.fieldsContainer, booleanCondition);
     }
 
